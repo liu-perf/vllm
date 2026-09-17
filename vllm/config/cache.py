@@ -144,7 +144,12 @@ class CacheConfig:
       Even if collisions are still very unlikely, it is important to consider your
       security risk tolerance against the performance benefits before turning this on.
     - "xxhash_cbor" combines canonical CBOR serialization with xxHash for
-      reproducible hashing. Requires the optional ``xxhash`` package."""
+      reproducible hashing. Requires the optional ``xxhash`` package.
+
+    The serialization format matters more here than the hash function does:
+    both CBOR variants cost several times "sha256" even though "xxhash" alone
+    is about half of it. See the prefix caching design doc for measured
+    relative costs."""
     prefix_cache_retention_interval: int | None = Field(default=0, ge=0)
     """Token interval between retained sliding-window and Mamba prefix-cache
     checkpoints. ``0`` retains only semantic checkpoints, including the latest

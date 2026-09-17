@@ -30,6 +30,17 @@ In the example above, the KV cache in the first block can be uniquely identified
     - `xxhash`: Uses Pickle serialization with xxHash (128-bit) for faster, non-cryptographic hashing. Requires the optional `xxhash` package. IMPORTANT: Use of a hashing algorithm that is not considered cryptographically secure theoretically increases the risk of hash collisions, which can cause undefined behavior or even leak private information in multi-tenant environments. Even if collisions are still very unlikely, it is important to consider your security risk tolerance against the performance benefits before turning this on.
     - `xxhash_cbor` combines canonical CBOR serialization with xxHash for reproducible hashing. Requires the optional `xxhash` package.    
 
+    The serialization format matters more here than the hash function does.
+    Relative to the `sha256` default, measured at `block_size=16` on a single
+    core (median of 7 x 40,000 calls, two independent runs): `xxhash` about
+    -48%, `xxhash_cbor` about +290% to +340%, `sha256_cbor` about +330% to
+    +380%. So both CBOR variants cost several times the default even though
+    `xxhash` on its own is about half of it, and `xxhash_cbor` is roughly 7-8x
+    `xxhash`. Absolute numbers are machine-dependent and the percentages moved
+    by 10-15% between runs, but the ordering did not. This is a per-block-hash
+    cost, so it scales with the number of blocks hashed rather than with total
+    tokens.
+
 **A hashing example with multi-modality inputs**  
 In this example, we illustrate how prefix caching works with multi-modality inputs (e.g., images). Assuming we have a request with the following messages:
 
